@@ -236,14 +236,19 @@ func UploadDigestRange(stream model.FileStreamer, rangeSpec string) (result stri
 // UploadByMultipart upload by mutipart blocks
 func (d *Pan115) UploadByMultipart(params *driver115.UploadOSSParams, fileSize int64, stream model.FileStreamer, dirID string, opts ...driver115.UploadMultipartOption) error {
 	var (
-		chunks    []oss.FileChunk
-		parts     []oss.UploadPart
-		imur      oss.InitiateMultipartUploadResult
-		ossClient *oss.Client
-		bucket    *oss.Bucket
-		ossToken  *driver115.UploadOSSTokenResp
-		err       error
+		chunks      []oss.FileChunk
+		parts       []oss.UploadPart
+		imur        oss.InitiateMultipartUploadResult
+		ossClient   *oss.Client
+		bucket      *oss.Bucket
+		ossToken    *driver115.UploadOSSTokenResp
+		err         error
+		ossEndpoint = driver115.OSSEndpoint
 	)
+	
+	if d.InternalUpload {
+		ossEndpoint = "oss-cn-shenzhen-internal.aliyuncs.com"
+	}
 
 	tmpF, err := stream.CacheFullInTempFile()
 	if err != nil {
@@ -261,7 +266,7 @@ func (d *Pan115) UploadByMultipart(params *driver115.UploadOSSParams, fileSize i
 		return err
 	}
 
-	if ossClient, err = oss.New(driver115.OSSEndpoint, ossToken.AccessKeyID, ossToken.AccessKeySecret); err != nil {
+	if ossClient, err = oss.New(ossEndpoint, ossToken.AccessKeyID, ossToken.AccessKeySecret); err != nil {
 		return err
 	}
 
