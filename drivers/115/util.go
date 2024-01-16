@@ -35,7 +35,11 @@ func (d *Pan115) login() error {
 		func(c *driver115.Pan115Client) {
 			c.Client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: conf.Conf.TlsInsecureSkipVerify})
 		},
+		func(c *driver115.Pan115Client) {
+			c.UseInternalUpload = d.InternalUpload
+		},
 	}
+
 	d.client = driver115.New(opts...)
 	cr := &driver115.Credential{}
 	if d.Addition.QRCodeToken != "" {
@@ -245,7 +249,7 @@ func (d *Pan115) UploadByMultipart(params *driver115.UploadOSSParams, fileSize i
 		err         error
 		ossEndpoint = driver115.OSSEndpoint
 	)
-	
+
 	if d.InternalUpload {
 		ossEndpoint = "oss-cn-shenzhen-internal.aliyuncs.com"
 	}
